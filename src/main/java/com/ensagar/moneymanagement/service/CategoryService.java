@@ -32,4 +32,33 @@ public class CategoryService{
 		return assembler.toDTO(entity);
 	}
 	
+	public java.util.List<CategoryDTO> getCategoriesForCurrentUser() {
+		ProfileEntity profile = profileService.getCurrentProfile();
+		
+		java.util.List<CategoryEntity> categories = categoryRepository.findByProfileId(profile.getId());
+		
+		return categories.stream().map(category -> assembler.toDTO(category)).toList();
+	}
+	
+	public java.util.List<CategoryDTO> getCategoriesByTypeForCurrentUser(String type) {
+		ProfileEntity profile = profileService.getCurrentProfile();
+
+		java.util.List<CategoryEntity> categories = categoryRepository.findByTypeAndProfileId(type, profile.getId());
+		
+		return categories.stream().map(category -> assembler.toDTO(category)).toList();
+	}
+	
+	public CategoryDTO updateCategory(Long categoryId, CategoryDTO category) {
+		ProfileEntity profile = profileService.getCurrentProfile();
+
+		CategoryEntity existingCategory = categoryRepository.findByIdAndProfileId(categoryId, profile.getId())
+		.orElseThrow(() -> new RuntimeException("Categroy not found or not accessbile"));
+		
+		existingCategory.setName(category.getName());
+		existingCategory.setIcon(category.getIcon());
+		
+		existingCategory = categoryRepository.save(existingCategory);
+		
+		return assembler.toDTO(existingCategory);
+	}
 }
